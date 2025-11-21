@@ -192,12 +192,52 @@ export type Database = {
           },
         ]
       }
+      chapter_pages: {
+        Row: {
+          cached_at: string | null
+          cached_image_url: string | null
+          chapter_id: string
+          created_at: string | null
+          id: string
+          page_number: number
+          source_image_url: string
+        }
+        Insert: {
+          cached_at?: string | null
+          cached_image_url?: string | null
+          chapter_id: string
+          created_at?: string | null
+          id?: string
+          page_number: number
+          source_image_url: string
+        }
+        Update: {
+          cached_at?: string | null
+          cached_image_url?: string | null
+          chapter_id?: string
+          created_at?: string | null
+          id?: string
+          page_number?: number
+          source_image_url?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "chapter_pages_chapter_id_fkey"
+            columns: ["chapter_id"]
+            isOneToOne: false
+            referencedRelation: "chapters"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       chapters: {
         Row: {
           chapter_number: number
           created_at: string | null
           id: string
           komik_id: string
+          source_chapter_id: string | null
+          source_url: string | null
           title: string | null
         }
         Insert: {
@@ -205,6 +245,8 @@ export type Database = {
           created_at?: string | null
           id?: string
           komik_id: string
+          source_chapter_id?: string | null
+          source_url?: string | null
           title?: string | null
         }
         Update: {
@@ -212,6 +254,8 @@ export type Database = {
           created_at?: string | null
           id?: string
           komik_id?: string
+          source_chapter_id?: string | null
+          source_url?: string | null
           title?: string | null
         }
         Relationships: [
@@ -286,6 +330,9 @@ export type Database = {
           popularity_score: number | null
           rating_admin: number | null
           slug: string
+          source_id: string | null
+          source_slug: string | null
+          source_url: string | null
           status: string | null
           title: string
           updated_at: string | null
@@ -309,6 +356,9 @@ export type Database = {
           popularity_score?: number | null
           rating_admin?: number | null
           slug: string
+          source_id?: string | null
+          source_slug?: string | null
+          source_url?: string | null
           status?: string | null
           title: string
           updated_at?: string | null
@@ -332,6 +382,9 @@ export type Database = {
           popularity_score?: number | null
           rating_admin?: number | null
           slug?: string
+          source_id?: string | null
+          source_slug?: string | null
+          source_url?: string | null
           status?: string | null
           title?: string
           updated_at?: string | null
@@ -339,7 +392,15 @@ export type Database = {
           views_today?: number | null
           views_week?: number | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "komik_source_id_fkey"
+            columns: ["source_id"]
+            isOneToOne: false
+            referencedRelation: "sources"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       rate_limits: {
         Row: {
@@ -412,6 +473,74 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      scrape_logs: {
+        Row: {
+          action: string | null
+          created_at: string | null
+          error_message: string | null
+          id: string
+          source_id: string | null
+          status: string | null
+          target_url: string | null
+        }
+        Insert: {
+          action?: string | null
+          created_at?: string | null
+          error_message?: string | null
+          id?: string
+          source_id?: string | null
+          status?: string | null
+          target_url?: string | null
+        }
+        Update: {
+          action?: string | null
+          created_at?: string | null
+          error_message?: string | null
+          id?: string
+          source_id?: string | null
+          status?: string | null
+          target_url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "scrape_logs_source_id_fkey"
+            columns: ["source_id"]
+            isOneToOne: false
+            referencedRelation: "sources"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sources: {
+        Row: {
+          base_url: string
+          code: string
+          created_at: string | null
+          id: string
+          is_active: boolean
+          name: string
+          updated_at: string | null
+        }
+        Insert: {
+          base_url: string
+          code: string
+          created_at?: string | null
+          id?: string
+          is_active?: boolean
+          name: string
+          updated_at?: string | null
+        }
+        Update: {
+          base_url?: string
+          code?: string
+          created_at?: string | null
+          id?: string
+          is_active?: boolean
+          name?: string
+          updated_at?: string | null
+        }
+        Relationships: []
       }
       user_roles: {
         Row: {
