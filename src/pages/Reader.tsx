@@ -91,14 +91,45 @@ const Reader = () => {
   const { data: images } = useQuery({
     queryKey: ["chapter-images", chapter?.id],
     queryFn: async () => {
+      if (!chapter?.id) return [];
+
+      // First check chapter_pages (new scraper system)
+      const { data: pages } = await supabase
+        .from("chapter_pages")
+        .select("*")
+        .eq("chapter_id", chapter.id)
+        .order("page_number");
+
+      if (pages && pages.length > 0) {
+        // If cache is old (>24h), trigger scraping in background
+        const cacheAge = pages[0].cached_at 
+          ? Date.now() - new Date(pages[0].cached_at).getTime()
+          : Infinity;
+        
+        if (cacheAge >= 24 * 60 * 60 * 1000) {
+          // Trigger background scraping (don't await)
+          supabase.functions.invoke("scrape-comic", {
+            body: { chapterId: chapter.id }
+          }).catch(console.error);
+        }
+
+        // Return existing pages
+        return pages.map(p => ({
+          id: p.id,
+          image_url: p.source_image_url,
+          order_index: p.page_number,
+        }));
+      }
+
+      // Fallback to old chapter_images
       const { data, error } = await supabase
         .from("chapter_images")
         .select("*")
-        .eq("chapter_id", chapter!.id)
+        .eq("chapter_id", chapter.id)
         .order("order_index", { ascending: true });
-      
+
       if (error) throw error;
-      return data;
+      return data || [];
     },
     enabled: !!chapter?.id,
   });
